@@ -12,7 +12,7 @@ const port = process.env.PORT;
 
 
 app.use(express.json());
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({ origin: 'https://enighander-store-fe-trial.vercel.app' }));
 app.options('*', cors());
 app.use(helmet({
       crossOriginResourcePolicy: false,
