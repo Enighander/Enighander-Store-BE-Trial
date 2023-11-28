@@ -1,18 +1,16 @@
 const multer = require("multer");
+const cloudinary = require("./claudinary.js")
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "./src/temp/image"); // Specify the destination folder for uploaded files
-  },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + "-" + file.originalname); // Use a unique filename
+    cb(null, uniqueSuffix + "-" + file.originalname);
   },
 });
 
 const fileFilter = (req, file, cb) => {
   const allowedMimeTypes = ["image/jpeg", "image/png", "image/jpg"];
-  const maxSize = 2 * 1024 * 1024; // 2MB
+  const maxSize = 2 * 1024 * 1024;
 
   if (!allowedMimeTypes.includes(file.mimetype)) {
     const error = new Error("File must be jpeg, jpg, or png");
@@ -36,5 +34,21 @@ const multerUpload = multer({
 
 const uploadCategory = multerUpload.single("image");
 
-module.exports = uploadCategory;
+// Middleware to upload to Cloudinary instead of disk storage
+const uploadToCloudinary = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return next(new Error("No file uploaded"));
+    }
+
+    const result = await cloudinary.uploader.upload(req.file.path);
+    req.file.cloudinaryUrl = result.secure_url;
+
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { uploadCategory, uploadToCloudinary };
 

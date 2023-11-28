@@ -1,8 +1,7 @@
 const { v4: uuidv4 } = require("uuid");
 const commonHelper = require("../helper/common.js");
-const client = require("../config/redis.js");
-
-// const cloudinary = require("../middlewares/claudinary.js");
+const cloudinary = require("../middlewares/claudinary.js");
+// const client = require("../config/redis.js");
 const {
   selectAll,
   select,
@@ -164,20 +163,20 @@ const productController = {
     }
   },
   insertProduct: async (req, res) => {
-    const PORT = process.env.PORT || 8000;
-    const DB_HOST = process.env.DB_HOST || "localhost";
+    const id = uuidv4()
     const { name, description, price, color, category, admin_id } = req.body;
     try {
-      if (!req.file || !req.file.filename) {
-        return res.status(400).send("No image file provided.");
+      let image = "";
+      if (req.file && req.file.filename) {
+        const result = await cloudinary.uploader.upload(req.file.path)
+        image = result.secure_url;
       }
-      const image = req.file.filename;
 
       const data = {
-        id: uuidv4(),
+        id,
         name,
         description,
-        image: `http://${DB_HOST}:${PORT}/img/${image}`,
+        image,
         price,
         color,
         category,
@@ -192,9 +191,6 @@ const productController = {
   },
   updateProduct: async (req, res) => {
     const id = String(req.params.id);
-    const PORT = process.env.PORT || 8000;
-    const DB_HOST = process.env.DB_HOST || "localhost";
-
     try {
       const { rowCount } = await findId(id);
       if (!rowCount) {
@@ -202,16 +198,19 @@ const productController = {
       }
 
       // Use req.file to get the uploaded file information
-      const image = req.file
-        ? `http://${DB_HOST}:${PORT}/img/${req.file.filename}`
-        : undefined;
+      let image = "";
+
+      if (req.file && req.file.path) {
+        const result = await cloudinary.uploader.upload(req.file.path);
+        image = result.secure_url;
+      }
 
       const { name, description, price, color, category } = req.body;
 
       const data = {
         name,
         description,
-        image, // Update the image URL if a new image is provided
+        image,
         price,
         color,
         category,

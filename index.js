@@ -10,7 +10,6 @@ const host = process.env.DB_HOST;
 const port = process.env.PORT;
 
 
-
 app.use(express.json());
 app.use(cors({ origin: 'https://enighander-store-fe-trial.vercel.app' }));
 app.options('*', cors());
@@ -19,7 +18,7 @@ app.use(helmet({
     }));
 app.use(morgan("dev"));
 app.use('/api/v1', mainRouter);
-app.use('/img', express.static("./src/temp/image"))
+app.use(express.static("./src/temp/image"))
 
 app.all("*", (req, res, next) => {
   next(new createError.NotFound());

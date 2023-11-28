@@ -1,5 +1,6 @@
-const { v4 : uuid4 } = require("uuid")
+const { v4: uuid4 } = require("uuid");
 const commonHelper = require("../helper/common.js");
+const cloudinary = require("../middlewares/claudinary.js");
 const {
   selectAll,
   select,
@@ -74,19 +75,18 @@ const categoryController = {
     // if(error){
     //   return commonHelper.response(res, result.rows, 422, error.message)
     // }
-    const PORT = process.env.PORT || 8000;
-    const DB_HOST = process.env.DB_HOST || "localhost";
+    const id = uuid4();
     const { name } = req.body;
-    const image = req.file.filename;
     try {
-      if (!req.file || !req.file.filename) {
-        return res.status(400).send("No image file provided.");
+      let image = "";
+      if (req.file && req.file.path) {
+        const result = await cloudinary.uploader.upload(req.file.path);
+        image = result.secure_url;
       }
-
       const data = {
-        id: uuid4(),
+        id,
         name,
-        image: `http://${DB_HOST}:${PORT}/img/${image}`,
+        image,
       };
       const result = await insert(data);
       commonHelper.response(res, result.rows, 201, "Category created");
@@ -97,20 +97,20 @@ const categoryController = {
   },
   updateCategory: async (req, res) => {
     const id = String(req.params.id);
-    const PORT = process.env.PORT || 8000;
-    const DB_HOST = process.env.DB_HOST || "localhost";
-
     try {
       const { rowCount } = await findId(id);
       if (!rowCount) {
         return commonHelper.response(res, null, 404, "Category not found");
       }
 
-      const image = req.file
-        ? `http://${DB_HOST}:${PORT}/img/${req.file.filename}`
-        : undefined;
+      let image = "";
 
-      const {name} = req.body;
+      if (req.file && req.file.path) {
+        const result = await cloudinary.uploader.upload(req.file.path);
+        image = result.secure_url;
+      }
+
+      const { name } = req.body;
 
       const data = {
         name,
@@ -130,7 +130,7 @@ const categoryController = {
     }
   },
   deleteCategory: async (req, res) => {
-    const id = Number(req.params.id);
+    const id = String(req.params.id);
     try {
       const deleteResult = await deleteData(id);
 
