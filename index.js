@@ -6,12 +6,12 @@ const app = express();
 const mainRouter = require("./src/routes/index.js");
 const morgan = require("morgan");
 const helmet = require("helmet");
-const host = process.env.DB_HOST;
 const port = process.env.PORT;
 
 
 app.use(express.json());
 app.use(cors({ origin: 'https://enighander-store-fe-trial.vercel.app' }));
+// app.use(cors({ origin: 'http://localhost:5173' }));
 app.options('*', cors());
 app.use(helmet({
       crossOriginResourcePolicy: false,
