@@ -1,5 +1,4 @@
 {
-  "name": "Enighander-Store",
   "version": 2,
   "builds": [
     {
@@ -16,7 +15,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": "/"
     }
   ]
 }
