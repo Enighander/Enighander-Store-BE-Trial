@@ -7,11 +7,10 @@ const mainRouter = require("./src/routes/index.js");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const port = process.env.PORT;
-
+const host = process.env.HOST;
 
 app.use(express.json());
-app.use(cors({ origin: 'https://enighander-store-fe-trial.vercel.app' }));
-// app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({ origin: `${host}` }));
 app.options('*', cors());
 app.use(helmet({
       crossOriginResourcePolicy: false,
