@@ -1,6 +1,8 @@
 const { v4: uuidv4 } = require("uuid");
 const commonHelper = require("../helper/common.js");
 const cloudinary = require("../middlewares/claudinary.js");
+const { addProductSchema } = require("../validator/product.js");
+const path = require('path')
 // const client = require("../config/redis.js");
 const {
   selectAll,
@@ -166,9 +168,18 @@ const productController = {
     const id = uuidv4()
     const { name, description, price, color, category, admin_id } = req.body;
     try {
+      const {error} = addProductSchema.validate(req.body);
+      if (error) {
+        const errorMessage = error.details[0].message;
+        return res.status(400).json({error: errorMessage})
+      }
       let image = "";
       if (req.file && req.file.filename) {
-        const result = await cloudinary.uploader.upload(req.file.path)
+        const imagePath = path.join('E-Store', 'Product', req.file.filename);
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: imagePath.replace(/\\/g, '/'),
+          overwrite: true,
+        })
         image = result.secure_url;
       }
 
@@ -186,7 +197,7 @@ const productController = {
       commonHelper.response(res, result.rows, 201, "Product created");
     } catch (error) {
       console.log(error);
-      res.status(500).send("An error occurred while create the product.");
+      res.status(500).send("An error occurred while creating the product.");
     }
   },
   updateProduct: async (req, res) => {

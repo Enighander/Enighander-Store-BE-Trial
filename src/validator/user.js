@@ -2,9 +2,9 @@ const Joi = require("joi");
 
 const registerUserSchema = Joi.object({
   username: Joi.string().alphanum().min(6).max(30).required().messages({
-    'string.min': 'Username should have a minimum of 6 characters',
-    'string.max': 'Username was more than of 30 characters',
-    'string.alphanum': 'Username should only contain alphanumeric characters',
+    'string.min': 'Username Should Have a Minimum of 6 characters',
+    'string.max': 'Username Was More Than 30 Characters',
+    'string.alphanum': 'Username should contain alphanumeric characters',
   }),
   email: Joi.string().email().required().messages({
     'string.email': 'Wrong Email Format',
