@@ -2,6 +2,7 @@
 const commonHelper = require("../helper/common.js");
 const { v4: uuidv4 } = require("uuid");
 const createError = require("http-errors");
+const { registerUserSchema } = require("../validator/user.js");
 const {
   selectAll,
   select,
@@ -63,15 +64,18 @@ const userController = {
       );
     } catch (error) {
       console.log(error);
-      res
-        .status(500)
-        .send("An error occurred while get specific the user.");
+      res.status(500).send("An error occurred while get specific the user.");
     }
   },
   registerUser: async (req, res, next) => {
     const { username, email, password, phone } = req.body;
-    const { rowCount } = await findEmail(email);
     try {
+      const { error } = registerUserSchema.validate(req.body);
+      if (error) {
+        const errorMessage = error.details[0].message;
+        return res.status(400).json({error: errorMessage})
+      }
+      const { rowCount } = await findEmail(email);
       if (rowCount) {
         return next(
           createError(403, "Email is already used. Please try again")
@@ -106,15 +110,10 @@ const userController = {
         id,
         username,
         email,
-        phone
+        phone,
       };
       const result = await update(data);
-      commonHelper.response(
-        res,
-        result.rows,
-        200,
-        "User updated successfully"
-      );
+      commonHelper.response(res, result.rows, 200, "User updated successfully");
     } catch (error) {
       console.error(error);
       return res.status(500).send("An error occurred while updating the user.");
@@ -182,7 +181,7 @@ const userController = {
       refreshToken: authHelper.generateRefreshToken(payload),
     };
     commonHelper.response(res, result, 200, "Session Restored");
-  }
+  },
 };
 
 module.exports = userController;

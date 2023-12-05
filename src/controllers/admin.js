@@ -2,6 +2,7 @@
 const commonHelper = require("../helper/common.js");
 const { v4: uuidv4 } = require("uuid");
 const createError = require("http-errors");
+const { registerAdminSchema } = require("../validator/admin.js");
 const {
   selectAll,
   update,
@@ -62,15 +63,18 @@ const adminController = {
       );
     } catch (error) {
       console.log(error);
-      res
-        .status(500)
-        .send("An error occurred while get specific the admin.");
+      res.status(500).send("An error occurred while get specific the admin.");
     }
   },
   registerAdmin: async (req, res, next) => {
     const { username, email, password, role } = req.body;
-    const { rowCount } = await findEmail(email);
     try {
+      const { error } = registerAdminSchema.validate(req.body);
+      if (error) {
+        const errorMessage = error.details[0].message;
+        return res.status(400).json({error: errorMessage})
+      }
+      const { rowCount } = await findEmail(email);
       if (rowCount) {
         return next(
           createError(403, "Email is already used. Please try again")
@@ -98,7 +102,7 @@ const adminController = {
       const {
         rows: [admin],
       } = await findEmail(email);
-      
+
       if (!admin) {
         return next(createError(403, "Invalid password. Please try again"));
       }
@@ -173,7 +177,7 @@ const adminController = {
       refreshToken: authHelper.generateRefreshToken(payload),
     };
     commonHelper.response(res, result, 200, "Session Restored");
-  }
+  },
 };
 
 module.exports = adminController;

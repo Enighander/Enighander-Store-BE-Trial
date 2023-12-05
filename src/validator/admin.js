@@ -1,6 +1,6 @@
 const Joi = require("joi");
 
-const registerUserSchema = Joi.object({
+const registerAdminSchema = Joi.object({
   username: Joi.string().alphanum().min(6).max(30).required().messages({
     'string.min': 'Username should have a minimum of 6 characters',
     'string.max': 'Username was more than of 30 characters',
@@ -15,4 +15,4 @@ const registerUserSchema = Joi.object({
 });
 
 
-module.exports = { registerUserSchema };
+module.exports = { registerAdminSchema };
