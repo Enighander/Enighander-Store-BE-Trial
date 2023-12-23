@@ -208,11 +208,14 @@ const productController = {
         return commonHelper.response(res, null, 404, "Product not found");
       }
 
-      // Use req.file to get the uploaded file information
       let image = "";
 
-      if (req.file && req.file.path) {
-        const result = await cloudinary.uploader.upload(req.file.path);
+      if (req.file && req.file.filename) {
+        const imagePath = path.join('E-Store', 'Product', req.file.filename);
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: imagePath.replace(/\\/g, '/'),
+          overwrite: true,
+        })
         image = result.secure_url;
       }
 

@@ -1,4 +1,5 @@
 const multer = require("multer");
+const cloudinary = require("./claudinary")
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -34,6 +35,21 @@ const multerUpload = multer({
   fileFilter: fileFilter,
 });
 
-const uploadUser = multerUpload.single("image");
+const uploadUser = multerUpload.single("image_profile");
 
-module.exports = uploadUser;
+const uploadToCloudinary = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return next(new Error("No file uploaded"));
+    }
+
+    const result = await cloudinary.uploader.upload(req.file.path);
+    req.file.cloudinaryUrl = result.secure_url;
+
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = {uploadUser, uploadToCloudinary};

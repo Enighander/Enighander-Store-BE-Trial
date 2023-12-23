@@ -60,11 +60,11 @@ const create = async (data) => {
 };
 
 const update = async (data) => {
-  const {id, username, email, phone} = data;
+  const {id, username, email, phone, image_profile} = data;
   try {
     const result = await pool.query(
-      "UPDATE users SET username = $1, email = $2, phone = $3 WHERE id = $4",
-      [username, email, id, phone]
+      "UPDATE users SET username = $1, email = $2, phone = $3, image_profile = $4 WHERE id = $5",
+      [username, email, phone, image_profile, id]
     );
     return result;
   } catch (error) {

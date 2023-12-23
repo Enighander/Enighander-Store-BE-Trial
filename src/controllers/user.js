@@ -1,8 +1,9 @@
-// const claudinary = require("../middlewares/claudinary.js");
+const cloudinary = require("../middlewares/claudinary.js");
+const path = require('path')
 const commonHelper = require("../helper/common.js");
 const { v4: uuidv4 } = require("uuid");
 const createError = require("http-errors");
-const { registerUserSchema } = require("../validator/user.js");
+const {registerUserSchema,updateUserSchema} = require("../validator/user.js")
 const {
   selectAll,
   select,
@@ -100,19 +101,40 @@ const userController = {
   },
   updateUser: async (req, res, next) => {
     const id = String(req.params.id);
-    const { username, email, phone } = req.body;
     try {
+
       const { rowCount } = await findUUID(id);
       if (!rowCount) {
         return commonHelper.response(res, null, 404, "User not found");
       }
+
+      const {error} = updateUserSchema.validate(req.body);
+      if (error) {
+        const errorMessage = error.details[0].message;
+        return res.status(400).json({error: errorMessage})
+      }
+
+      let image_profile = "";
+
+      if (req.file && req.file.filename) {
+        const imagePath = path.join('E-Store', 'Photo_profile', req.file.filename);
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: imagePath.replace(/\\/g, '/'),
+          overwrite: true,
+        })
+        image_profile = result.secure_url;
+      }
+
+      const { username, email, phone } = req.body;
+      
       const data = {
         id,
         username,
         email,
+        image_profile,
         phone,
       };
-      const result = await update(data);
+      const result = await update(data, id);
       commonHelper.response(res, result.rows, 200, "User updated successfully");
     } catch (error) {
       console.error(error);
