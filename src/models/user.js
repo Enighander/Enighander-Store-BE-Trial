@@ -59,12 +59,12 @@ const create = async (data) => {
   }
 };
 
-const update = async (data) => {
-  const {id, username, email, phone, image_profile} = data;
+const updateData = async (data) => {
+  const {id, username, email, phone} = data;
   try {
     const result = await pool.query(
-      "UPDATE users SET username = $1, email = $2, phone = $3, image_profile = $4 WHERE id = $5",
-      [username, email, phone, image_profile, id]
+      "UPDATE users SET username = $1, email = $2, phone = $3 WHERE id = $4",
+      [username, email, phone, id]
     );
     return result;
   } catch (error) {
@@ -72,6 +72,34 @@ const update = async (data) => {
   }
 
 };
+
+const updateImage = async (data) => {
+  const {id, image_profile } = data;
+  try {
+    const result = await pool.query(
+      "UPDATE users SET image_profile = $1 WHERE id = $2",
+      [image_profile, id]
+    );
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}
+
+const updatePassword = async (data) => {
+  const {id, passwordHash} = data;
+  try {
+    const result = await pool.query(
+      "UPDATE users SET password = $1 WHERE id = $2",
+      [passwordHash, id]
+    );
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
 
 const deleteData = async (id) => {
   try {
@@ -111,6 +139,8 @@ module.exports = {
   findUserId,
   create,
   deleteData,
-  update,
+  updateData,
+  updateImage,
+  updatePassword,
   countData
 };

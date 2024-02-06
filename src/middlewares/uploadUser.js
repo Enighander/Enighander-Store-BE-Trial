@@ -52,4 +52,16 @@ const uploadToCloudinary = async (req, res, next) => {
   }
 };
 
-module.exports = {uploadUser, uploadToCloudinary};
+const multerUpdateUserData = multer({
+  storage: multer.diskStorage({}), // You can configure storage if needed
+  fileFilter: (req, file, cb) => {
+    // Add your file filter logic here if needed
+    cb(null, true);
+  },
+}).none();  // This calls the none() method directly
+
+module.exports = {
+  multerUpdateUserData,
+  uploadUser,
+  uploadToCloudinary
+};
